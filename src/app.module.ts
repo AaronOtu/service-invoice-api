@@ -5,10 +5,16 @@ import { EmployeesModule } from './employees/employees.module';
 import { AdminModule } from './admin/admin.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { InvoiceModule } from './invoice/invoice.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { RolesGuard } from './guard/role.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
-  imports: [EmployeesModule, AdminModule, InventoryModule, InvoiceModule],
+
+  imports: [
+    MongooseModule.forRoot('mongodb://localhost:27017/service-invoice-api'),
+    EmployeesModule, AdminModule, InventoryModule, InvoiceModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [ AppService,  { provide: APP_GUARD, useClass: RolesGuard },],
 })
 export class AppModule {}

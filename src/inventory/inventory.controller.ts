@@ -7,28 +7,28 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
-  @Post()
-  create(@Body() createInventoryDto: CreateInventoryDto) {
-    return this.inventoryService.create(createInventoryDto);
-  }
+  // @Post()
+  // create(@Body() createInventoryDto: CreateInventoryDto) {
+  //   return this.inventoryService.create(createInventoryDto);
+  // }
 
-  @Get()
-  findAll() {
-    return this.inventoryService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.inventoryService.findAll();
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.inventoryService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.inventoryService.findOne(+id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInventoryDto: UpdateInventoryDto) {
-    return this.inventoryService.update(+id, updateInventoryDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateInventoryDto: UpdateInventoryDto) {
+  //   return this.inventoryService.update(+id, updateInventoryDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.inventoryService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.inventoryService.remove(+id);
+  // }
 }
