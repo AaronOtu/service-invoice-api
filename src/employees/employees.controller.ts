@@ -1,34 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { EmployeesService } from './employees.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { Role } from 'src/enum/role.enum';
+import { Roles } from 'src/enum/roles.decorator';
+import { AuthGuard } from 'src/guard/auth.guard';
+import { RolesGuard } from 'src/guard/role.guard';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { EmployeesService } from './employees.service';
 
-@Controller('employees')
+@Controller('api')
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(private readonly employeesService: EmployeesService) { }
 
-  // @Post()
-  // create(@Body() createEmployeeDto: CreateEmployeeDto) {
-  //   return this.employeesService.create(createEmployeeDto);
-  // }
 
-  // @Get()
-  // findAll() {
-  //   return this.employeesService.findAll();
-  // }
+  @Post('employee/register')
+  registerEmployee(@Body() createEmployeeDto: CreateEmployeeDto) {
+    return this.employeesService.registerEmployee(createEmployeeDto);
+  }
+  @Post('employee/login')
+  loginEmployee(@Body() { email, password }: Pick<CreateEmployeeDto, 'email' | 'password'>) {
+    return this.employeesService.loginEmployee(email, password);
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.employeesService.findOne(+id);
-  // }
+  @Get('employee')
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard, RolesGuard)
+  getAllEmployee(@Request() req: any) {
+    console.log('Authenticated User:', req.user);
+    return this.employeesService.getAllEmployee();
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
-  //   return this.employeesService.update(+id, updateEmployeeDto);
-  // }
+  @Get('employee/:id')
+  getEmployeeProfile(@Param('id') id: string) {
+    return this.employeesService.getEmployeeProfile(id);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.employeesService.remove(+id);
-  // }
+  @Patch('employee/:id')
+  update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+    return this.employeesService.updateEmployee(id, updateEmployeeDto);
+  }
+
+  @Delete('employee/:id')
+  removeEmployee(@Param('id') id: string) {
+    return this.employeesService.removeEmployee(id);
+  }
 }

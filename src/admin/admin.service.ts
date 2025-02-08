@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { Admin } from './schemas/admin.schemas';
@@ -17,7 +17,7 @@ export class AdminService {
     try {
       const existingAdmin = await this.adminModel.findOne({ email: createAdminDto.email }).exec();
       if (existingAdmin) {
-        throw new ConflictException('User with this email already exits')
+        throw new ConflictException('This Admin already exits')
       }
       const hashedPassword = await bcrypt.hash(createAdminDto.password, 10);
 
@@ -29,42 +29,58 @@ export class AdminService {
       await newAdmin.save();
       return {
         message: 'Successfully registered Admin',
-        response: newAdmin
+        admin: newAdmin
       }
     }
     catch (error) {
-      throw new InternalServerErrorException(error.message);
+      this.logger.log(error)
+      throw error
     }
   }
 
 
   async loginAdmin(email: string, password: string) {
-    const admin = await this.adminModel.findOne({ email }).exec();
-    if (!admin) {
-      throw new UnauthorizedException('Admin not found');
+    try {
+
+      if (!email || !password) {
+        throw new BadRequestException('Email and password are required');
+      }
+  
+      const admin = await this.adminModel.findOne({ email }).exec();
+      if (!admin) {
+        throw new UnauthorizedException('Admin not found');
+      }
+
+      const isMatch = await bcrypt.compare(password, admin.password);
+      if (!isMatch) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const payload = 
+      { 
+        id: admin._id, 
+        email: admin.email, 
+        role: admin.role, 
+      };
+      const accessToken = this.jwtService.sign(payload);
+
+      this.logger.log(`Admin logged in: ${admin.firstname}. ${admin.email}`);
+      this.logger.log("Generated JWT Payload:", payload)
+      return {
+        message: 'Login Successful',
+        accessToken: accessToken,
+        admin: {
+          id: admin._id,
+          firstname: admin.firstname,
+          lastname: admin.lastname,
+          email: admin.email,
+          role: admin.role,
+        },
+      };
+    } catch (error) {
+      throw error
     }
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const payload = { email: admin.email, role: admin.role, id: admin._id };
-    const accessToken = this.jwtService.sign(payload);
-
-    this.logger.log(`Admin logged in: ${admin.email}`);
-
-    return {
-      message: 'Login Successful',
-      accessToken,
-      admin: {
-        id: admin._id,
-        firstname: admin.firstname,
-        lastname: admin.lastname,
-        email: admin.email,
-        role: admin.role,
-      },
-    };
   }
 
 
@@ -97,6 +113,7 @@ export class AdminService {
         admin: admins
       };
     } catch (error) {
+      this.logger.log(error)
       throw new ConflictException(error.message || 'Something went wrong')
     }
   }
@@ -113,7 +130,8 @@ export class AdminService {
         admin: admin
       }
     } catch (error) {
-      throw new ConflictException(error.message || 'Something went wrong')
+      this.logger.log(error)
+      throw error
     }
   }
 
@@ -124,7 +142,8 @@ export class AdminService {
         message: `Successfully deleted admin`
       }
     } catch (error) {
-
+      this.logger.log(error.message)
+      throw new ConflictException('Something went wrong')
     }
   }
 }

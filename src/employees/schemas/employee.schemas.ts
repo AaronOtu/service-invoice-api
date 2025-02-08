@@ -2,11 +2,9 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 import { Role } from "src/enum/role.enum";
 
-
-export type AdminDocument = HydratedDocument<Admin>;
+export type EmployeeDocument = HydratedDocument<Employee>;
 @Schema({ timestamps: true })
-export class Admin {
-
+export class Employee {
   @Prop()
   firstname: string;
 
@@ -23,10 +21,10 @@ export class Admin {
     {
       enum: Role,
       type: String,
-      default: Role.ADMIN
+      default: Role.EMPLOYEE
     }
   )
-  role: Role
+  role: Role;
 
   @Prop({ type: Date })
   createdAt?: Date;
@@ -36,4 +34,4 @@ export class Admin {
 
 }
 
-export const AdminSchema = SchemaFactory.createForClass(Admin);
+export const EmployeeSchema = SchemaFactory.createForClass(Employee);
