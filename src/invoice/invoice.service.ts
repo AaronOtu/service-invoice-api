@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Admin, AdminDocument } from 'src/admin/schemas/admin.schemas';
+import { Employee, EmployeeDocument } from 'src/employees/schemas/employee.schemas';
+import { Inventory, InventoryDocument } from 'src/inventory/schemas/inventory.schemas';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
-import { InjectModel } from '@nestjs/mongoose';
 import { Invoice, InvoiceDocument, InvoiceItem } from './schemas/invoice.schemas';
-import { Inventory, InventoryDocument } from 'src/inventory/schemas/inventory.schemas';
-import { Admin, AdminDocument } from 'src/admin/schemas/admin.schemas';
-import { Model } from 'mongoose';
-import { Employee, EmployeeDocument } from 'src/employees/schemas/employee.schemas';
 
 @Injectable()
 export class InvoiceService {
@@ -16,12 +16,12 @@ export class InvoiceService {
     @InjectModel(Inventory.name) private inventoryModel: Model<InventoryDocument>,
     @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
-  ) {}
+  ) { }
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
     try {
       const { items, userId } = createInvoiceDto;
-      
+
       let totalQuantity = 0;
       let totalCost = 0;
       const savedInvoiceItems = [];
@@ -29,7 +29,7 @@ export class InvoiceService {
       // Process each item and create invoice items
       for (const itemDto of items) {
         const inventoryItem = await this.inventoryModel.findById(itemDto.inventoryItem);
-        
+
         if (!inventoryItem) {
           throw new NotFoundException(`Inventory item with ID ${itemDto.inventoryItem} not found`);
         }
@@ -93,12 +93,12 @@ export class InvoiceService {
         message: 'Invoice created successfully',
         invoice: populatedInvoice
       };
-  
 
 
 
 
-      
+
+
     } catch (error) {
       // Rollback in case of error
       // implement a proper rollback mechanism 
@@ -171,7 +171,7 @@ export class InvoiceService {
 
   async remove(id: string) {
     const invoice = await this.invoiceModel.findByIdAndDelete(id);
-    
+
     if (!invoice) {
       throw new NotFoundException(`Invoice with ID ${id} not found`);
     }
@@ -179,3 +179,6 @@ export class InvoiceService {
     return { success: true, message: 'Invoice deleted successfully' };
   }
 }
+
+
+

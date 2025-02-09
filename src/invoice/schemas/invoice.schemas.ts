@@ -16,7 +16,7 @@ export class InvoiceItem {
   inventoryItem:Types.ObjectId;
 
   @Prop({required:true})
-  qunatity:number;
+  quantity:number;
 
   @Prop({required:true})
   cost:number

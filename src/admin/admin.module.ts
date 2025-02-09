@@ -21,5 +21,6 @@ import { jwtConstants } from 'src/guard/auth.constants';
   ],
   controllers: [AdminController],
   providers: [AdminService],
+  exports:[MongooseModule]
 })
 export class AdminModule { }

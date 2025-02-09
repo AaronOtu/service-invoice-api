@@ -3,32 +3,32 @@ import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
-@Controller('invoice')
+@Controller('api')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
-  // @Post()
-  // create(@Body() createInvoiceDto: CreateInvoiceDto) {
-  //   return this.invoiceService.create(createInvoiceDto);
-  // }
+  @Post('invoice')
+  create(@Body() createInvoiceDto: CreateInvoiceDto) {
+    return this.invoiceService.createInvoice(createInvoiceDto);
+  }
 
-  // @Get()
-  // findAll() {
-  //   return this.invoiceService.findAll();
-  // }
+  @Get('invoice')
+  findAll() {
+    return this.invoiceService.findAll();
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.invoiceService.findOne(+id);
-  // }
+  @Get('invoice/:id')
+  findOne(@Param('id') id: string) {
+    return this.invoiceService.findOne(id);
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
-  //   return this.invoiceService.update(+id, updateInvoiceDto);
-  // }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
+    return this.invoiceService.update(id, updateInvoiceDto);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.invoiceService.remove(+id);
-  // }
+  @Delete('invoice/:id')
+  remove(@Param('id') id: string) {
+    return this.invoiceService.remove(id);
+  }
 }

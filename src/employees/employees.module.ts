@@ -6,8 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from 'src/guard/auth.constants';
-import { AuthGuard } from 'src/guard/auth.guard';
-import { APP_GUARD } from '@nestjs/core';
+
 
 @Module({
   imports: [
@@ -23,5 +22,6 @@ import { APP_GUARD } from '@nestjs/core';
   ],
   controllers: [EmployeesController],
   providers: [EmployeesService,],
+  exports : [MongooseModule]
 })
 export class EmployeesModule {}
