@@ -16,6 +16,13 @@ export class InvoiceItem {
   inventoryItem:Types.ObjectId;
 
   @Prop({required:true})
+  name: string
+
+  @Prop({required :true})
+  costPerItem:number
+
+
+  @Prop({required:true})
   quantity:number;
 
   @Prop({required:true})
@@ -25,20 +32,68 @@ export class InvoiceItem {
 
 export const InvoiceItemSchema = SchemaFactory.createForClass(InvoiceItem)
 
+interface InventoryDocument extends Inventory, Document {
+  name: string;
+  cost: number;
+}
+InvoiceItemSchema.pre('save',async function(next){
+  if(this.isNew){
+    const inventory = await this.model('Inventory').findById(this.inventoryItem) as InventoryDocument
+    if(inventory){
+      this.name = inventory.name;
+      this.costPerItem = inventory.cost
+    }
+  }
+
+  next();
 
 
+})
+
+
+interface StoredInvoiceItem{
+  inventoryid: Types.ObjectId;
+  name: string
+  costPerItem:number;
+  quantity:number;
+  cost:number;
+}
+
+interface StoredAdmin extends Admin,Document{
+  type: 'admin';
+  adminId:Types.ObjectId;
+  firstName:string;
+  lastName:string
+}
+
+interface StoredEmployee extends Employee, Document{
+  type: 'employee'
+  employeeId:Types.ObjectId;
+  firstName: string;
+  lastName:string;
+}
+
+
+type UserAccount = StoredAdmin | StoredEmployee;
 
 
 @Schema({timestamps:true})
 export class Invoice {
 
-@Prop({ type: [{ type: Types.ObjectId, ref: 'InvoiceItem' }], required: true })
-items:Types.ObjectId[];
+  @Prop({ type: [{
+    inventoryItem: { type: Types.ObjectId, required: true, ref: 'Inventory' },
+    name: { type: String },
+    costPerItem: { type: Number },
+    quantity: { type: Number},
+    cost: { type: Number}
+  }] })
+  items: StoredInvoiceItem[];
 
-@Prop({required:true})
+
+@Prop()
 totalCost:number
 
-@Prop({required:true})
+@Prop()
 totalQuantity:number
 
 @Prop({
@@ -48,12 +103,45 @@ default:Status.PENDING
 })
 status:Status
 
-@Prop({type:Types.ObjectId, ref:'Admin', required:false})
-admin?:Admin
 
-@Prop({type:Types.ObjectId, ref:'Employee', required:false})
-employee?:Employee
-
+@Prop({
+  type: {
+    userType: { type: String, enum: ['admin', 'employee'], required:true },
+    adminId: { type: Types.ObjectId, ref: 'Admin' },
+    employeeId: { type: Types.ObjectId, ref: 'Employee' },
+    firstName: { type: String },
+    lastName: { type: String}
+  },
+  required: true
+})
+userAccount: UserAccount;
 }
 
+
+
 export const InvoiceSchema = SchemaFactory.createForClass(Invoice)
+
+
+InvoiceSchema.pre('save', async function(next) {
+  if (this.isNew) {
+    // Calculate totals
+    // this.totalQuantity = this.items.reduce((sum, item) => sum + item.quantity, 0);
+    // this.totalCost = this.items.reduce((sum, item) => sum + item.cost, 0);
+
+    // Populate user account details
+    if (this.userAccount.type === 'admin' && this.userAccount.adminId) {
+      const admin = await this.model('Admin').findById(this.userAccount.adminId) as StoredAdmin
+      if (admin) {
+        this.userAccount.firstName = admin.firstname;
+        this.userAccount.lastName = admin.lastname;
+      }
+    } else if (this.userAccount.type === 'employee' && this.userAccount.employeeId) {
+      const employee = await this.model('Employee').findById(this.userAccount.employeeId) as StoredEmployee
+      if (employee) {
+        this.userAccount.firstName = employee.firstname;
+        this.userAccount.lastName = employee.lastname;
+      }
+    }
+  }
+  next();
+});

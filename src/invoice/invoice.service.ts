@@ -1,184 +1,218 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Admin, AdminDocument } from 'src/admin/schemas/admin.schemas';
-import { Employee, EmployeeDocument } from 'src/employees/schemas/employee.schemas';
-import { Inventory, InventoryDocument } from 'src/inventory/schemas/inventory.schemas';
+import { Model, Types } from 'mongoose';
+import { Invoice } from './schemas/invoice.schemas';
+import { Admin } from '../admin/schemas/admin.schemas';
+import { Employee } from '../employees/schemas/employee.schemas';
+import { Inventory } from '../inventory/schemas/inventory.schemas';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { UpdateInvoiceDto } from './dto/update-invoice.dto';
-import { Invoice, InvoiceDocument, InvoiceItem } from './schemas/invoice.schemas';
+import { Status } from '../enum/invoice.enum';
 
 @Injectable()
 export class InvoiceService {
+  private readonly logger = new Logger(InvoiceService.name);
+
   constructor(
-    @InjectModel(Invoice.name) private invoiceModel: Model<InvoiceDocument>,
-    @InjectModel(InvoiceItem.name) private invoiceItemModel: Model<InvoiceItem>,
-    @InjectModel(Inventory.name) private inventoryModel: Model<InventoryDocument>,
-    @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
-    @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+    @InjectModel(Invoice.name) private invoiceModel: Model<Invoice>,
+    @InjectModel(Admin.name) private adminModel: Model<Admin>,
+    @InjectModel(Employee.name) private employeeModel: Model<Employee>,
+    @InjectModel(Inventory.name) private inventoryModel: Model<Inventory>
   ) { }
+
+  private async formatInvoiceResponse(invoice: any, includeUserInfo = true) {
+    const formattedItems = await Promise.all(invoice.items.map(async (item) => {
+      const inventory = await this.inventoryModel.findById(item.inventoryItem);
+      return {
+        _id: item.inventoryItem.toString(),
+        name: item.name,
+        quantity: item.quantity,
+        cost: item.costPerItem,
+        totalCost: item.cost,
+        available: inventory?.quantity || 0
+      };
+    }));
+
+    let userInfo = {};
+    if (includeUserInfo) {
+      const user = await (invoice.userAccount.userType === 'admin'
+        ? this.adminModel.findById(invoice.userAccount.adminId)
+        : this.employeeModel.findById(invoice.userAccount.employeeId));
+
+      if (user) {
+        userInfo = {
+          name: `${user.firstname} ${user.lastname}`,
+          email: user.email,
+          role: user.role
+        };
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Invoice retrieved successfully',
+      invoice: {
+        _id: invoice._id.toString(),
+        userInfo,
+        items: formattedItems,
+        totalQuantity: invoice.totalQuantity,
+        totalCost: invoice.totalCost,
+        status: invoice.status,
+        createdAt: invoice.createdAt,
+        updatedAt: invoice.updatedAt
+      }
+    };
+  }
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
     try {
-      const { items, userId } = createInvoiceDto;
+      // Find user and determine type
+      let user = await this.adminModel.findById(createInvoiceDto.userId);
+      let userType = 'admin';
 
-      let totalQuantity = 0;
-      let totalCost = 0;
-      const savedInvoiceItems = [];
-
-      // Process each item and create invoice items
-      for (const itemDto of items) {
-        const inventoryItem = await this.inventoryModel.findById(itemDto.inventoryItem);
-
-        if (!inventoryItem) {
-          throw new NotFoundException(`Inventory item with ID ${itemDto.inventoryItem} not found`);
+      if (!user) {
+        user = await this.employeeModel.findById(createInvoiceDto.userId);
+        userType = 'employee';
+        if (!user) {
+          throw new NotFoundException('User not found');
         }
-
-        if (inventoryItem.quantity < itemDto.quantity) {
-          throw new BadRequestException(
-            `Insufficient stock for ${inventoryItem.name}. Available: ${inventoryItem.quantity}, Requested: ${itemDto.quantity}`
-          );
-        }
-
-        // Create and save invoice item
-        const invoiceItem = await this.invoiceItemModel.create({
-          inventoryItem: inventoryItem._id,
-          quantity: itemDto.quantity,
-          cost: inventoryItem.cost * itemDto.quantity
-        });
-
-        // Update inventory quantity
-        await this.inventoryModel.findByIdAndUpdate(
-          inventoryItem._id,
-          { $inc: { quantity: -itemDto.quantity } },
-          { new: true }
-        );
-
-        savedInvoiceItems.push(invoiceItem._id);
-        totalCost += invoiceItem.cost;
-        totalQuantity += itemDto.quantity;
       }
 
-      // Find user (admin or employee)
-      const admin = await this.adminModel.findById(userId);
-      const employee = await this.employeeModel.findById(userId);
+      // Process items
+      const processedItems = [];
+      let totalQuantity = 0;
+      let totalCost = 0;
 
-      if (!admin && !employee) {
-        throw new NotFoundException(`User with ID ${userId} not found`);
+      for (const item of createInvoiceDto.items) {
+        const inventory = await this.inventoryModel.findById(item.inventoryItem);
+        if (!inventory) {
+          throw new NotFoundException(`Inventory item ${item.inventoryItem} not found`);
+        }
+
+        const itemTotalCost = inventory.cost * item.quantity;
+        processedItems.push({
+          inventoryItem: new Types.ObjectId(item.inventoryItem),
+          name: inventory.name,
+          costPerItem: inventory.cost,
+          quantity: item.quantity,
+          cost: itemTotalCost
+        });
+
+        totalQuantity += item.quantity;
+        totalCost += itemTotalCost;
       }
 
       // Create invoice
       const invoice = await this.invoiceModel.create({
-        items: savedInvoiceItems,
-        totalCost,
+        items: processedItems,
         totalQuantity,
-        ...(admin ? { admin: admin._id } : { employee: employee._id })
+        totalCost,
+        userAccount: {
+          userType,
+          [`${userType}Id`]: user._id,
+          firstname: user.firstname,
+          lastname: user.lastname
+        }
       });
 
-      // Populate the response
-      const populatedInvoice = await invoice.populate([
-        {
-          path: 'items',
-          populate: {
-            path: 'inventoryItem',
-            select: 'name quantity cost available'
-          }
-        },
-        { path: 'admin', select: 'firstname lastname email' },
-        { path: 'employee', select: 'firstname lastname email' }
-      ]);
-
-      return {
-        success: true,
-        message: 'Invoice created successfully',
-        invoice: populatedInvoice
-      };
-
-
-
-
-
-
+      return this.formatInvoiceResponse(invoice);
     } catch (error) {
-      // Rollback in case of error
-      // implement a proper rollback mechanism 
-      console.error('Error creating invoice:', error);
+      this.logger.error('Error creating invoice:', error);
       throw error;
     }
   }
 
-  async findAll() {
-    return this.invoiceModel
-      .find()
-      .populate([
-        {
-          path: 'items',
-          populate: {
-            path: 'inventoryItem',
-            select: 'name quantity cost available'
-          }
-        },
-        { path: 'admin', select: 'firstname lastname email' },
-        { path: 'employee', select: 'firstname lastname email' }
-      ])
-      .exec();
+  async getAllInvoices() {
+    try {
+      const invoices = await this.invoiceModel.find()
+        .sort({ createdAt: -1 })
+        .exec();
+
+      const formattedInvoices = await Promise.all(
+        invoices.map(invoice => this.formatInvoiceResponse(invoice, false))
+      );
+
+      return {
+        success: true,
+        message: 'Invoices retrieved successfully',
+        invoices: formattedInvoices.map(response => response.invoice)
+      };
+    } catch (error) {
+      this.logger.error('Error retrieving invoices:', error);
+      throw error;
+    }
   }
 
-  async findOne(id: string) {
-    const invoice = await this.invoiceModel
-      .findById(id)
-      .populate([
-        {
-          path: 'items',
-          populate: {
-            path: 'inventoryItem',
-            select: 'name quantity cost available'
-          }
-        },
-        { path: 'admin', select: 'firstname lastname email' },
-        { path: 'employee', select: 'firstname lastname email' }
-      ])
-      .exec();
+  async getInvoiceById(id: string) {
+    try {
+      const invoice = await this.invoiceModel.findById(id);
+      if (!invoice) {
+        throw new NotFoundException('Invoice not found');
+      }
 
-    if (!invoice) {
-      throw new NotFoundException(`Invoice with ID ${id} not found`);
+      return this.formatInvoiceResponse(invoice);
+    } catch (error) {
+      this.logger.error('Error retrieving invoice:', error);
+      throw error;
     }
-
-    return invoice;
   }
 
-  async update(id: string, updateInvoiceDto: UpdateInvoiceDto) {
-    const invoice = await this.invoiceModel
-      .findByIdAndUpdate(id, updateInvoiceDto, { new: true })
-      .populate([
-        {
-          path: 'items',
-          populate: {
-            path: 'inventoryItem',
-            select: 'name quantity cost available'
-          }
-        },
-        { path: 'admin', select: 'firstname lastname email' },
-        { path: 'employee', select: 'firstname lastname email' }
-      ]);
+  async updateInvoiceStatus(id: string, status: Status) {
+    try {
+      const invoice = await this.invoiceModel.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+      );
 
-    if (!invoice) {
-      throw new NotFoundException(`Invoice with ID ${id} not found`);
+      if (!invoice) {
+        throw new NotFoundException('Invoice not found');
+      }
+
+      return this.formatInvoiceResponse(invoice);
+    } catch (error) {
+      this.logger.error('Error updating invoice status:', error);
+      throw error;
     }
-
-    return invoice;
   }
 
-  async remove(id: string) {
-    const invoice = await this.invoiceModel.findByIdAndDelete(id);
+  async getUserInvoices(userId: string) {
+    try {
+      const invoices = await this.invoiceModel.find({
+        $or: [
+          { 'userAccount.adminId': userId },
+          { 'userAccount.employeeId': userId }
+        ]
+      }).sort({ createdAt: -1 });
 
-    if (!invoice) {
-      throw new NotFoundException(`Invoice with ID ${id} not found`);
+      const formattedInvoices = await Promise.all(
+        invoices.map(invoice => this.formatInvoiceResponse(invoice))
+      );
+
+      return {
+        success: true,
+        message: 'User invoices retrieved successfully',
+        invoices: formattedInvoices.map(response => response.invoice)
+      };
+    } catch (error) {
+      this.logger.error('Error retrieving user invoices:', error);
+      throw error;
     }
+  }
 
-    return { success: true, message: 'Invoice deleted successfully' };
+  async deleteInvoice(id: string) {
+    try {
+      const invoice = await this.invoiceModel.findByIdAndDelete(id);
+      if (!invoice) {
+        throw new NotFoundException('Invoice not found');
+      }
+
+      return {
+        success: true,
+        message: 'Invoice deleted successfully'
+      };
+    } catch (error) {
+      this.logger.error('Error deleting invoice:', error);
+      throw error;
+    }
   }
 }
-
-
-
