@@ -3,32 +3,32 @@ import { MaterialRequestService } from './material-request.service';
 import { CreateMaterialRequestDto } from './dto/create-material-request.dto';
 import { UpdateMaterialRequestDto } from './dto/update-material-request.dto';
 
-@Controller('material-request')
+@Controller('api')
 export class MaterialRequestController {
   constructor(private readonly materialRequestService: MaterialRequestService) {}
 
-  @Post()
+  @Post('material-request')
   create(@Body() createMaterialRequestDto: CreateMaterialRequestDto) {
-    return this.materialRequestService.create(createMaterialRequestDto);
+    return this.materialRequestService.requestMaterial(createMaterialRequestDto);
   }
 
-  @Get()
+  @Get('material-request')
   findAll() {
-    return this.materialRequestService.findAll();
+    return this.materialRequestService.getAllMaterialRequested();
   }
 
-  @Get(':id')
+  @Get('material-request/:id')
   findOne(@Param('id') id: string) {
-    return this.materialRequestService.findOne(+id);
+    return this.materialRequestService.getOneMaterialRequested(id);
   }
 
-  @Patch(':id')
+  @Patch('material-request/:id')
   update(@Param('id') id: string, @Body() updateMaterialRequestDto: UpdateMaterialRequestDto) {
-    return this.materialRequestService.update(+id, updateMaterialRequestDto);
+    return this.materialRequestService.update(id, updateMaterialRequestDto);
   }
 
-  @Delete(':id')
+  @Delete('material-request/:id')
   remove(@Param('id') id: string) {
-    return this.materialRequestService.remove(+id);
+    return this.materialRequestService.remove(id);
   }
 }

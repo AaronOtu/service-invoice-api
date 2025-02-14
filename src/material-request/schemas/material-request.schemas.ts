@@ -10,7 +10,7 @@ export class MaterialRequest {
   @Prop({ type: Types.ObjectId, ref: 'Inventory', required: true })
   inventoryItem: Types.ObjectId;
 
-  @Prop({ required: true })  
+  @Prop({ required: false })  
   name: string;
 
   @Prop({ required: true })
@@ -25,6 +25,8 @@ export class MaterialRequest {
     default: MaterialStatus.PENDING
   })
   status: MaterialStatus;
+
+
 }
 
 export const MaterialRequestSchema = SchemaFactory.createForClass(MaterialRequest);
