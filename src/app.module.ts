@@ -8,13 +8,14 @@ import { InvoiceModule } from './invoice/invoice.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RolesGuard } from './guard/role.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { MaterialRequestModule } from './material-request/material-request.module';
 
 
 @Module({
 
   imports: [
     MongooseModule.forRoot('mongodb://localhost:27017/service-invoice-api'),
-    AdminModule, EmployeesModule,  InventoryModule, InvoiceModule,],
+    AdminModule, EmployeesModule,  InventoryModule, InvoiceModule, MaterialRequestModule,],
   controllers: [AppController],
   providers: [ AppService,],
 })

@@ -7,6 +7,7 @@ import { Employee } from '../employees/schemas/employee.schemas';
 import { Inventory } from '../inventory/schemas/inventory.schemas';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { Status } from '../enum/invoice.enum';
+import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -65,7 +66,7 @@ export class InvoiceService {
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
     try {
-      // Find user and determine type
+      // This find the user and determine type
       let user = await this.adminModel.findById(createInvoiceDto.userId);
       let userType = 'admin';
 
@@ -121,25 +122,22 @@ export class InvoiceService {
     }
   }
 
-  async getAllInvoices() {
+  async getInvoices() {
     try {
-      const invoices = await this.invoiceModel.find()
-        .sort({ createdAt: -1 })
-        .exec();
-
-      const formattedInvoices = await Promise.all(
-        invoices.map(invoice => this.formatInvoiceResponse(invoice, false))
-      );
+      const invoices = await this.invoiceModel.find().sort({ createdAt: -1 });
 
       return {
         success: true,
         message: 'Invoices retrieved successfully',
-        invoices: formattedInvoices.map(response => response.invoice)
+        invoice: invoices
       };
-    } catch (error) {
-      this.logger.error('Error retrieving invoices:', error);
-      throw error;
+
     }
+    catch (error) {
+      this.logger.log(error.message)
+      throw error
+    }
+
   }
 
   async getInvoiceById(id: string) {
@@ -172,6 +170,26 @@ export class InvoiceService {
     } catch (error) {
       this.logger.error('Error updating invoice status:', error);
       throw error;
+    }
+  }
+
+  async updateInvoice(id: string, updateInvoiceDto: UpdateInvoiceDto) {
+    try {
+      const invoice = await this.invoiceModel.findByIdAndUpdate(id, updateInvoiceDto, { new: true })
+      if (!invoice) {
+        this.logger.log(`Invoice with id ${invoice}`)
+        throw new NotFoundException('Inventory not found')
+      }
+      this.logger.log(`Successfully updated invoice with id ${invoice}`)
+      return {
+        success: true,
+        message: "Successfully updated invoice",
+        invoice: invoice
+      }
+
+    }
+    catch (error) {
+      throw error
     }
   }
 

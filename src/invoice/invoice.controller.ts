@@ -14,7 +14,7 @@ export class InvoiceController {
 
   @Get('invoice')
   findAll() {
-    return this.invoiceService.getAllInvoices();
+    return this.invoiceService.getInvoices();
   }
 
   @Get('invoice/:id')
@@ -22,10 +22,10 @@ export class InvoiceController {
     return this.invoiceService.getInvoiceById(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
-  //   return this.invoiceService.updateInvoiceStatus(id, updateInvoiceDto.status);
-  // }
+  @Patch('invoice:id')
+  update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
+    return this.invoiceService.updateInvoice(id, updateInvoiceDto);
+  }
 
 
 @Get('invoice/user/:id')

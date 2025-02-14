@@ -1,11 +1,14 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { trueFalse } from "src/enum/inventory.enum";
 
 
 export type InventoryDocument = HydratedDocument<Inventory>;
 @Schema({timestamps:true})
 export class Inventory {
+static findById(inventoryItem: Types.ObjectId) {
+  throw new Error("Method not implemented.");
+}
 
 @Prop()
 name: string
