@@ -1,10 +1,11 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateMaterialRequestDto } from './dto/create-material-request.dto';
 import { UpdateMaterialRequestDto } from './dto/update-material-request.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MaterialRequest } from './schemas/material-request.schemas';
 import { Inventory } from 'src/inventory/schemas/inventory.schemas';
+import { MaterialStatus } from 'src/enum/material-request.enum';
 
 @Injectable()
 export class MaterialRequestService {
@@ -18,9 +19,40 @@ export class MaterialRequestService {
   async requestMaterial(createMaterialRequestDto: CreateMaterialRequestDto) {
 
     try {
-      const materialRequest = await this.materialRequestModel.create(createMaterialRequestDto)
+
+      const inventoryItem = await this.inventoryModel.findById(createMaterialRequestDto.inventoryItem)
+      if(!inventoryItem){
+        throw new NotFoundException('Inventory Item not found')
+      }
+
+      if(inventoryItem.quantity < createMaterialRequestDto.quantity){
+        throw new BadRequestException( `Insufficient stock for ${inventoryItem.name}. Available: ${inventoryItem.quantity}, Requested: ${createMaterialRequestDto.quantity}`)
+      }
+
+     const costPerItem = inventoryItem.cost
+     const totalCost = costPerItem * createMaterialRequestDto.quantity
+
+
+     const payload = {
+      inventoryItem: createMaterialRequestDto.inventoryItem,
+      name: inventoryItem.name,
+      quantity: createMaterialRequestDto.quantity,
+      costPerItem: costPerItem,
+      totalCost:totalCost,
+      purpose: createMaterialRequestDto.purpose,
+      status: MaterialStatus.PENDING
+
+     }
+
+   
+
+    const materialRequest = await this.materialRequestModel.create(payload)
+
+   
+
       this.logger.log(`material requested :>> ${materialRequest}`)
-      
+
+
       return {
         success:true,
         message:'Successfully requested for a material',

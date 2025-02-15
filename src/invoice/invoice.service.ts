@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Invoice } from './schemas/invoice.schemas';
@@ -89,11 +89,18 @@ export class InvoiceService {
           throw new NotFoundException(`Inventory item ${item.inventoryItem} not found`);
         }
 
-        const itemTotalCost = inventory.cost * item.quantity;
+        if (inventory.quantity < item.quantity) {
+          throw new BadRequestException(
+            `Insufficient stock for ${inventory.name}. Available: ${inventory.quantity}, Requested: ${item.quantity}`
+          );
+        }
+
+
+        const itemTotalCost = (item.cost ?? inventory.cost) * item.quantity;
         processedItems.push({
           inventoryItem: new Types.ObjectId(item.inventoryItem),
           name: inventory.name,
-          costPerItem: inventory.cost,
+          costPerItem: item.cost ?? inventory.cost,
           quantity: item.quantity,
           cost: itemTotalCost
         });
@@ -114,6 +121,7 @@ export class InvoiceService {
           lastname: user.lastname
         }
       });
+      this.logger.log('Succesfully created invoice', invoice)
 
       return this.formatInvoiceResponse(invoice);
     } catch (error) {

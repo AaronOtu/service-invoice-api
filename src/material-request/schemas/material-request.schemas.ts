@@ -10,11 +10,18 @@ export class MaterialRequest {
   @Prop({ type: Types.ObjectId, ref: 'Inventory', required: true })
   inventoryItem: Types.ObjectId;
 
-  @Prop({ required: false })  
+  @Prop({ required: true })  
   name: string;
 
   @Prop({ required: true })
-  quantity: string;
+  quantity: number;
+
+ 
+  @Prop({required: true})
+  costPerItem: number
+
+  @Prop({required:true})
+  totalCost:number
 
   @Prop({ required: false })
   purpose: string;
@@ -37,6 +44,8 @@ MaterialRequestSchema.pre('save', async function (next) {
     const inventory = await this.model('Inventory').findById(this.inventoryItem) as InventoryDocument;
     if (inventory) {
       this.name = inventory.name;
+      this.costPerItem = inventory.cost
+
     }
   }
   next();

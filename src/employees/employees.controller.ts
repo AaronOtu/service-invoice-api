@@ -3,7 +3,7 @@ import { Role } from 'src/enum/role.enum';
 import { Roles } from 'src/enum/roles.decorator';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { RolesGuard } from 'src/guard/role.guard';
-import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { CreateEmployeeDto, LoginEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { EmployeesService } from './employees.service';
 
@@ -17,8 +17,8 @@ export class EmployeesController {
     return this.employeesService.registerEmployee(createEmployeeDto);
   }
   @Post('employee/login')
-  loginEmployee(@Body() { email, password }: Pick<CreateEmployeeDto, 'email' | 'password'>) {
-    return this.employeesService.loginEmployee(email, password);
+  loginEmployee(@Body() loginDto: LoginEmployeeDto) {
+    return this.employeesService.loginEmployee(loginDto);
   }
 
   @Get('employee')

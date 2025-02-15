@@ -1,5 +1,5 @@
 import { BadGatewayException, BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateEmployeeDto } from './dto/create-employee.dto';
+import { CreateEmployeeDto, LoginEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Employee } from './schemas/employee.schemas';
@@ -46,19 +46,19 @@ export class EmployeesService {
 
   }
 
-  async loginEmployee(email: string, password: string) {
+  async loginEmployee(loginDto:LoginEmployeeDto) {
     try {
 
-      if (!email || !password) {
+      if (!loginDto.email || !loginDto.password) {
         throw new BadRequestException('Email and password are required');
       }
   
-      const employee = await this.employeeModel.findOne({ email }).exec();
+      const employee = await this.employeeModel.findOne({ email: loginDto.email }).exec();
       if (!employee) {
         throw new UnauthorizedException('Employee not found')
       }
 
-      const isMatch = await bcrypt.compare(password, employee.password)
+      const isMatch = await bcrypt.compare(loginDto.password, employee.password)
       if (!isMatch) {
         throw new UnauthorizedException('Invalid credentials');
       }

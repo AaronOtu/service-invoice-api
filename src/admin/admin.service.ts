@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateAdminDto } from './dto/create-admin.dto';
+import { CreateAdminDto, LoginAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { Admin } from './schemas/admin.schemas';
 import { Model } from 'mongoose';
@@ -39,19 +39,19 @@ export class AdminService {
   }
 
 
-  async loginAdmin(email: string, password: string) {
+  async loginAdmin(loginDto: LoginAdminDto) {
     try {
 
-      if (!email || !password) {
+      if (!loginDto.email || !loginDto.password) {
         throw new BadRequestException('Email and password are required');
       }
   
-      const admin = await this.adminModel.findOne({ email }).exec();
+      const admin = await this.adminModel.findOne({email: loginDto.email}).exec();
       if (!admin) {
         throw new UnauthorizedException('Admin not found');
       }
 
-      const isMatch = await bcrypt.compare(password, admin.password);
+      const isMatch = await bcrypt.compare(loginDto.password, admin.password);
       if (!isMatch) {
         throw new UnauthorizedException('Invalid credentials');
       }
