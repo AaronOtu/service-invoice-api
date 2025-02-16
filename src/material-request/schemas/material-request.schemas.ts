@@ -10,6 +10,11 @@ export class MaterialRequest {
   @Prop({ type: Types.ObjectId, ref: 'Inventory', required: true })
   inventoryItem: Types.ObjectId;
 
+
+  @Prop({ type: Types.ObjectId, ref: 'Invoice' })
+  invoice: Types.ObjectId;
+
+
   @Prop({ required: true })  
   name: string;
 

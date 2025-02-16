@@ -2,5 +2,6 @@
 export enum MaterialStatus{
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
-  PENDING = 'PENDING'
+  PENDING = 'PENDING',
+  CANCELLED = 'CANCELLED'
 }

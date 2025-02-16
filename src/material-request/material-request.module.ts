@@ -13,6 +13,6 @@ import { InventoryModule } from 'src/inventory/inventory.module';
   ],
   controllers:[MaterialRequestController],
   providers: [MaterialRequestService],
-  
+  exports: [MongooseModule]
 })
 export class MaterialRequestModule {}

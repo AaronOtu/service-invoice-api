@@ -12,6 +12,11 @@ export class CreateInvoiceDto {
   @ApiProperty({required:true, default:'67a8d19138a1de11ad44f71a'})
   userId: string;
 
+  // @IsNotEmpty()
+  // @IsMongoId()
+  // @ApiProperty({required:true, default:'67a8d19138a1de11ad44f71a'})
+  // materialRequestId: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => InvoiceItemDto)

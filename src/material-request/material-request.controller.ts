@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { MaterialRequestService } from './material-request.service';
-import { CreateMaterialRequestDto } from './dto/create-material-request.dto';
+import { CreateMaterialRequestDto, StatusDto } from './dto/create-material-request.dto';
 import { UpdateMaterialRequestDto } from './dto/update-material-request.dto';
 
 @Controller('api')
@@ -25,6 +25,10 @@ export class MaterialRequestController {
   @Patch('material-request/:id')
   update(@Param('id') id: string, @Body() updateMaterialRequestDto: UpdateMaterialRequestDto) {
     return this.materialRequestService.update(id, updateMaterialRequestDto);
+  }
+  @Patch('material-request/status/:id')
+  updateStatus(@Param('id') id: string, @Body() status: StatusDto) {
+    return this.materialRequestService.updateStatus(id, status);
   }
 
   @Delete('material-request/:id')

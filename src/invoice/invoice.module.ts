@@ -6,6 +6,7 @@ import { Invoice, InvoiceItem, InvoiceItemSchema, InvoiceSchema } from './schema
 import { InventoryModule } from 'src/inventory/inventory.module';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { AdminModule } from 'src/admin/admin.module';
+import { MaterialRequestModule } from 'src/material-request/material-request.module';
 
 
 @Module({
@@ -16,7 +17,8 @@ import { AdminModule } from 'src/admin/admin.module';
     ]),
     InventoryModule,
     AdminModule,
-    EmployeesModule
+    EmployeesModule,
+    MaterialRequestModule
   ],
   controllers: [InvoiceController],
   providers: [InvoiceService],

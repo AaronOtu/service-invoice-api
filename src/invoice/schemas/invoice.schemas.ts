@@ -15,6 +15,9 @@ export class InvoiceItem {
   @Prop({type: Types.ObjectId, ref:'Inventory', required:true})
   inventoryItem:Types.ObjectId;
 
+  // @Prop({ type: Types.ObjectId, ref: 'MaterialRequest', required: true }) 
+  // materialRequest: Types.ObjectId;
+
   @Prop({required:true})
   name: string
 

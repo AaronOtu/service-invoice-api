@@ -8,6 +8,8 @@ import { Inventory } from '../inventory/schemas/inventory.schemas';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { Status } from '../enum/invoice.enum';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import { MaterialRequest } from 'src/material-request/schemas/material-request.schemas';
+import { MaterialStatus } from 'src/enum/material-request.enum';
 
 @Injectable()
 export class InvoiceService {
@@ -17,7 +19,8 @@ export class InvoiceService {
     @InjectModel(Invoice.name) private invoiceModel: Model<Invoice>,
     @InjectModel(Admin.name) private adminModel: Model<Admin>,
     @InjectModel(Employee.name) private employeeModel: Model<Employee>,
-    @InjectModel(Inventory.name) private inventoryModel: Model<Inventory>
+    @InjectModel(Inventory.name) private inventoryModel: Model<Inventory>,
+   // @InjectModel(MaterialRequest.name) private materialRequestModel: Model<MaterialRequest>
   ) { }
 
   private async formatInvoiceResponse(invoice: any, includeUserInfo = true) {
@@ -77,6 +80,17 @@ export class InvoiceService {
           throw new NotFoundException('User not found');
         }
       }
+
+      // const materialRequest = await this.materialRequestModel.findById(createInvoiceDto.materialRequestId)
+      // if(!materialRequest){
+      //   throw new NotFoundException('Material request not found');
+      // }
+      
+      // if (materialRequest.status !== MaterialStatus.APPROVED) {
+      //   throw new BadRequestException('Cannot create an invoice for a non-approved material request');
+      // }
+  
+
 
       // Process items
       const processedItems = [];
@@ -186,7 +200,7 @@ export class InvoiceService {
       const invoice = await this.invoiceModel.findByIdAndUpdate(id, updateInvoiceDto, { new: true })
       if (!invoice) {
         this.logger.log(`Invoice with id ${invoice}`)
-        throw new NotFoundException('Inventory not found')
+        throw new NotFoundException('Invoice not found')
       }
       this.logger.log(`Successfully updated invoice with id ${invoice}`)
       return {
