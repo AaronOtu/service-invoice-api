@@ -135,7 +135,7 @@ export class MaterialRequestService {
 
   async updateStatus(id: string, status: StatusDto) {
     try {
-      // First, find the existing material request to get current state
+      
       const material = await this.materialRequestModel.findById(id);
       if (!material) {
         throw new NotFoundException(`Material with id ${id} not found`);
@@ -145,6 +145,7 @@ export class MaterialRequestService {
       if (material.status === MaterialStatus.APPROVED && status.status === MaterialStatus.APPROVED) {
         throw new BadRequestException('This material request has already been approved.');
       }
+
       if (material.status === MaterialStatus.CANCELLED && status.status === MaterialStatus.CANCELLED) {
         throw new BadRequestException('This material request has already been cancelled.');
       }
@@ -160,7 +161,7 @@ export class MaterialRequestService {
         await inventoryItem.save();
       }
 
-      // Update only the status field
+    
       material.status = status.status;
       await material.save();
 

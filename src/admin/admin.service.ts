@@ -63,12 +63,13 @@ export class AdminService {
         role: admin.role, 
       };
       const accessToken = this.jwtService.sign(payload);
+      const refreshToken = this.jwtService.sign(payload,{expiresIn : '7d'})
 
       this.logger.log(`Admin logged in: ${admin.firstname}. ${admin.email}`);
       this.logger.log("Generated JWT Payload:", payload)
       return {
+        success: true,
         message: 'Login Successful',
-        accessToken: accessToken,
         admin: {
           id: admin._id,
           firstname: admin.firstname,
@@ -76,6 +77,8 @@ export class AdminService {
           email: admin.email,
           role: admin.role,
         },
+        accessToken: accessToken,
+        refreshToken: refreshToken,
       };
     } catch (error) {
       throw error

@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsArray, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger"
-import { MaterialStatus } from "src/enum/material-request.enum";
+import { ApiProperty } from "@nestjs/swagger";
+import { Status } from "src/enum/invoice.enum";
 
 
 
@@ -59,3 +59,11 @@ class InvoiceItemDto {
 
 
 
+
+export class StatusDto {
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({required:true, default: Status.PENDING})
+  status:Status
+}

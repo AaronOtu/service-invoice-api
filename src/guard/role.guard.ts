@@ -42,7 +42,7 @@ export class RolesGuard implements CanActivate {
     console.log('RolesGuard - Has required role:', hasRole);
 
     if (!hasRole) {
-      throw new UnauthorizedException('Insufficient permissions.');
+      throw new UnauthorizedException('User has no permission.');
     }
 
     return true;

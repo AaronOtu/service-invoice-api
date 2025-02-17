@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { CreateInvoiceDto, StatusDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
 @Controller('api')
@@ -22,9 +22,15 @@ export class InvoiceController {
     return this.invoiceService.getInvoiceById(id);
   }
 
-  @Patch('invoice:id')
-  update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
-    return this.invoiceService.updateInvoice(id, updateInvoiceDto);
+  // @Patch('invoice:id')
+  // update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
+  //   return this.invoiceService.updateInvoice(id, updateInvoiceDto);
+  // }
+
+
+  @Patch('invoice/status:id')
+  updateStatus(@Param('id') id: string, @Body() statusDto: StatusDto) {
+    return this.invoiceService.updateStatusInvoice(id, statusDto);
   }
 
 

@@ -70,17 +70,20 @@ export class EmployeesService {
         role: employee.role,
       }
       const accessToken = this.jwtService.sign(payload);
+      const refreshToken = this.jwtService.sign(payload);
 
       return {
+        success: true,
         message: "Login Successful",
-        accessToken: accessToken,
         employee: {
           employeeId: employee._id,
           firstname: employee.firstname,
           lastname: employee.lastname,
           email: employee.email,
           role: employee.role,
-        }
+        },
+        accessToken: accessToken,
+        refreshToken: refreshToken
 
       };
 
@@ -155,7 +158,8 @@ export class EmployeesService {
    if(!inventory){
     throw new NotFoundException('Employee not found')
    }
-
+    
+   this.logger.log('Successfully deleted employee')
    return{
     message: 'Successfully deleted employee'
    }

@@ -5,7 +5,7 @@ import { Invoice } from './schemas/invoice.schemas';
 import { Admin } from '../admin/schemas/admin.schemas';
 import { Employee } from '../employees/schemas/employee.schemas';
 import { Inventory } from '../inventory/schemas/inventory.schemas';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { CreateInvoiceDto, StatusDto } from './dto/create-invoice.dto';
 import { Status } from '../enum/invoice.enum';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { MaterialRequest } from 'src/material-request/schemas/material-request.schemas';
@@ -214,7 +214,44 @@ export class InvoiceService {
       throw error
     }
   }
-
+  async updateStatusInvoice(id: string, statusDto: StatusDto) {
+    try {
+      // Validate ID
+      if (!id) {
+        throw new BadRequestException('Invoice ID is required');
+      }
+  
+      // Validate status against enum
+      if (!Object.values(Status).includes(statusDto.status)) {
+        this.logger.error(`Invalid status provided: ${statusDto.status}`);
+        throw new BadRequestException(
+          `Invalid status. Must be one of: ${Object.values(Status).join(', ')}`
+        );
+      }
+  
+      const invoice = await this.invoiceModel.findByIdAndUpdate(
+        id,
+        { status: statusDto.status },
+        { new: true }
+      ).exec();
+  
+      if (!invoice) {
+        this.logger.error(`Invoice not found with id: ${id}`);
+        throw new NotFoundException('Invoice not found');
+      }
+  
+      this.logger.log(`Invoice ${id} status updated ${statusDto.status}`);
+  
+      return {
+        success: true,
+        message: `Successfully updated status to ${statusDto.status}`,
+        invoice
+      };
+    } catch (error) {
+      this.logger.error(`Failed to update invoice status: ${error.message}`);
+      throw error;
+    }
+  }
   async getUserInvoices(userId: string) {
     try {
       const invoices = await this.invoiceModel.find({
