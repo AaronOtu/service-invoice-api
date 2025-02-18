@@ -6,7 +6,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from 'src/guard/auth.constants';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Module({
   imports: [
@@ -14,8 +15,8 @@ import { jwtConstants } from 'src/guard/auth.constants';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
        global:true,
-       secret:jwtConstants.secret,
-      //secret: process.env.JWT_SECRET || 'my_secret_key', 
+       //secret:jwtConstants.secret,
+      secret: process.env.JWT_SECRET , 
       signOptions: { expiresIn: '1h' }, 
     }),
    

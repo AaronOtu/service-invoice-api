@@ -60,6 +60,8 @@ export class InvoiceService {
         items: formattedItems,
         totalQuantity: invoice.totalQuantity,
         totalCost: invoice.totalCost,
+        VAT:invoice.totalCost * 0.125,
+        amountPayable: invoice.totalCost + invoice.totalCost * 0.125,
         status: invoice.status,
         createdAt: invoice.createdAt,
         updatedAt: invoice.updatedAt
@@ -69,7 +71,7 @@ export class InvoiceService {
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
     try {
-      // This find the user and determine type
+    
       let user = await this.adminModel.findById(createInvoiceDto.userId);
       let userType = 'admin';
 
@@ -96,7 +98,7 @@ export class InvoiceService {
       const processedItems = [];
       let totalQuantity = 0;
       let totalCost = 0;
-
+      
       for (const item of createInvoiceDto.items) {
         const inventory = await this.inventoryModel.findById(item.inventoryItem);
         if (!inventory) {
@@ -111,6 +113,7 @@ export class InvoiceService {
 
 
         const itemTotalCost = (item.cost ?? inventory.cost) * item.quantity;
+       
         processedItems.push({
           inventoryItem: new Types.ObjectId(item.inventoryItem),
           name: inventory.name,
@@ -121,6 +124,8 @@ export class InvoiceService {
 
         totalQuantity += item.quantity;
         totalCost += itemTotalCost;
+      
+       
       }
 
       // Create invoice

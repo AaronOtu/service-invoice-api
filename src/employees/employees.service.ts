@@ -1,4 +1,4 @@
-import { BadGatewayException, BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateEmployeeDto, LoginEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -72,6 +72,8 @@ export class EmployeesService {
       const accessToken = this.jwtService.sign(payload);
       const refreshToken = this.jwtService.sign(payload);
 
+      this.logger.log(`Employee logged in: ${employee.firstname}. ${employee.email}`);
+      this.logger.log("Login successful", payload)
       return {
         success: true,
         message: "Login Successful",

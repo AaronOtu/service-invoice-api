@@ -9,12 +9,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { RolesGuard } from './guard/role.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { MaterialRequestModule } from './material-request/material-request.module';
+import { ConfigModule } from '@nestjs/config';
 
 
 @Module({
 
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/service-invoice-api'),
+    ConfigModule.forRoot({ isGlobal: true}),
+    MongooseModule.forRoot(process.env.DATABASE_URL),
+    //MongooseModule.forRoot('mongodb://localhost:27017/service-invoice-api'),
     AdminModule, EmployeesModule,  InventoryModule, InvoiceModule, MaterialRequestModule,],
   controllers: [AppController],
   providers: [ AppService,],

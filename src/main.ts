@@ -2,15 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe)
 
-   // Set up Swagger configuration
+
    const config = new DocumentBuilder()
    .setTitle('Invoice Service API')
-   .setDescription('An API to send generate invoices')
+   .setDescription('An API to send generated invoices')
    .setVersion('1.0')
    .addBearerAuth()
    .build();
