@@ -6,7 +6,10 @@ import { RolesGuard } from 'src/guard/role.guard';
 import { CreateEmployeeDto, LoginEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { EmployeesService } from './employees.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+
+//@ApiBearerAuth('JWT-auth')
 @Controller('api')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) { }
@@ -16,6 +19,7 @@ export class EmployeesController {
   registerEmployee(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.registerEmployee(createEmployeeDto);
   }
+  @ApiTags('Auth') 
   @Post('employee/login')
   loginEmployee(@Body() loginDto: LoginEmployeeDto) {
     return this.employeesService.loginEmployee(loginDto);

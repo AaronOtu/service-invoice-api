@@ -35,7 +35,6 @@ export class CreateEmployeeDto {
 
 export class LoginEmployeeDto{
 
-
   @IsString()
   @IsEmail()
   @IsNotEmpty()

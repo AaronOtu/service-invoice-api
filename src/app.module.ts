@@ -6,10 +6,11 @@ import { AdminModule } from './admin/admin.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { RolesGuard } from './guard/role.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { MaterialRequestModule } from './material-request/material-request.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthGuard } from './guard/auth.guard';
+
 
 
 @Module({
@@ -20,6 +21,12 @@ import { ConfigModule } from '@nestjs/config';
     //MongooseModule.forRoot('mongodb://localhost:27017/service-invoice-api'),
     AdminModule, EmployeesModule,  InventoryModule, InvoiceModule, MaterialRequestModule,],
   controllers: [AppController],
-  providers: [ AppService,],
+  providers: [
+     AppService,
+    //  {
+    //   provide: APP_GUARD,
+    //   useClass: AuthGuard
+    //  }
+    ],
 })
 export class AppModule {}

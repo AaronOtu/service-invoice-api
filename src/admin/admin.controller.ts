@@ -3,7 +3,8 @@ import { RolesGuard } from 'src/guard/role.guard';
 import { AdminService } from './admin.service';
 import { CreateAdminDto, LoginAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
-
+import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/enum/public.decorator';
 
 @Controller('api')
 @UseGuards(RolesGuard)
@@ -15,16 +16,16 @@ export class AdminController {
     return this.adminService.registerAdmin(createAdminDto);
   }
 
-
+  @ApiTags('Auth') 
   @Post('admin/login')
   loginAdmin(@Body() loginDto: LoginAdminDto) {
     return this.adminService.loginAdmin(loginDto);
   }
 
-
+  @Public()
   @Get('admin')
-  //@UseGuards(AuthGuard)
   //@Roles(Role.ADMIN)
+  //@UseGuards(AuthGuard, RoleGuard)
   getAllAdmins() {
     return this.adminService.getAllAdmins();
   }

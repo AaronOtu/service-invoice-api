@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { MaterialRequestService } from './material-request.service';
 import { CreateMaterialRequestDto, StatusDto } from './dto/create-material-request.dto';
 import { UpdateMaterialRequestDto } from './dto/update-material-request.dto';
+import { Public } from 'src/enum/public.decorator';
 
 @Controller('api')
 export class MaterialRequestController {
@@ -12,6 +13,7 @@ export class MaterialRequestController {
     return this.materialRequestService.requestMaterial(createMaterialRequestDto);
   }
 
+  @Public()
   @Get('material-request')
   findAll() {
     return this.materialRequestService.getAllMaterialRequested();
