@@ -17,6 +17,11 @@ export class CreateInvoiceDto {
   // @ApiProperty({required:true, default:'67a8d19138a1de11ad44f71a'})
   // materialRequestId: string;
 
+  @IsOptional()
+  @IsString()
+  @ApiProperty({required:true, default: 'IInvoice for kwesi Oppong'})
+  title: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => InvoiceItemDto)
@@ -55,6 +60,7 @@ class InvoiceItemDto {
   @IsNumber()
   @ApiProperty({required:true, default:40})
   cost: number;
+
 }
 
 

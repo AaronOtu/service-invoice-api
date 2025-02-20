@@ -94,6 +94,9 @@ export class Invoice {
 
 
 @Prop()
+title:string
+
+@Prop()
 totalCost:number
 
 @Prop()
@@ -119,6 +122,7 @@ status:Status
 })
 userAccount: UserAccount;
 }
+
 
 
 

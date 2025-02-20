@@ -56,6 +56,7 @@ export class InvoiceService {
       message: 'Invoice retrieved successfully',
       invoice: {
         _id: invoice._id.toString(),
+        title:invoice.title,
         userInfo,
         items: formattedItems,
         totalQuantity: invoice.totalQuantity,
@@ -131,6 +132,7 @@ export class InvoiceService {
       // Create invoice
       const invoice = await this.invoiceModel.create({
         items: processedItems,
+        title:createInvoiceDto.title,
         totalQuantity,
         totalCost,
         userAccount: {
@@ -141,7 +143,7 @@ export class InvoiceService {
         }
       });
       this.logger.log('Succesfully created invoice', invoice)
-
+     
       return this.formatInvoiceResponse(invoice);
     } catch (error) {
       this.logger.error('Error creating invoice:', error);

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, Search } from '@nestjs/common';
 import { CreateMaterialRequestDto, StatusDto } from './dto/create-material-request.dto';
 import { UpdateMaterialRequestDto } from './dto/update-material-request.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -212,4 +212,85 @@ export class MaterialRequestService {
     }
 
   }
+  
+//   async Search(searchCriteria: any){
+//   try{
+
+//   }
+//   catch(error){
+//     this.logger.error(`Error searching for material request: ${error.message}`);
+//     throw error
+//   }
+// }
+
+
+
+async search(
+  status?: string,
+  requestStartDate?: string,
+  requestEndDate?: string,
+  approvalStartDate?: string,
+  approvalEndDate?: string
+) {
+  try {
+    const query: any = {};
+
+    // Status filter
+    if (status) {
+      query.status = status;
+    }
+
+    // Request date filter (using createdAt)
+    if (requestStartDate || requestEndDate) {
+      query.createdAt = {};
+      
+      if (requestStartDate) {
+        const start = new Date(requestStartDate);
+        start.setHours(0, 0, 0, 0);
+        query.createdAt.$gte = start;
+      }
+      
+      if (requestEndDate) {
+        const end = new Date(requestEndDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
+
+    // Approval date filter
+    if (approvalStartDate || approvalEndDate) {
+      query.updatedAt = {};
+      query.status = MaterialStatus.APPROVED;  // Only approved items have approval dates
+      
+      if (approvalStartDate) {
+        const start = new Date(approvalStartDate);
+        start.setHours(0, 0, 0, 0);
+        query.updatedAt.$gte = start;
+      }
+      
+      if (approvalEndDate) {
+        const end = new Date(approvalEndDate);
+        end.setHours(23, 59, 59, 999);
+        query.updatedAt.$lte = end;
+      }
+    }
+
+    const materials = await this.materialRequestModel
+      .find(query)
+      .sort({ createdAt: -1 })
+      .exec();
+
+    this.logger.log(`Search results found: ${materials.length}`);
+
+    return {
+      success: true,
+      message: "Successfully retrieved material requests",
+      data: materials
+    };
+  } catch (error) {
+    this.logger.error(`Error searching material requests: ${error.message}`);
+    throw error;
+  }
 }
+}
+

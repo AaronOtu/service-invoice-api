@@ -38,6 +38,14 @@ export class MaterialRequest {
   })
   status: MaterialStatus;
 
+  @Prop({type:Date})
+  createdAt?: Date;
+
+  @Prop({type:Date})
+  updatedAt?: Date;
+
+
+
 
 }
 
