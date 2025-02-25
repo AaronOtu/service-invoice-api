@@ -51,13 +51,21 @@ export class InvoiceService {
       }
     }
 
+    let clientInfo = {
+      name: invoice.clientName,
+      email: invoice.clientEmail,
+      address: invoice.clientAddress
+    }
+
     return {
       success: true,
-      message: 'Invoice retrieved successfully',
+      message: 'Invoice operation completed successfully.',
       invoice: {
         _id: invoice._id.toString(),
+        invoiceId: invoice.invoiceId,
         title:invoice.title,
         userInfo,
+        clientInfo,
         items: formattedItems,
         totalQuantity: invoice.totalQuantity,
         totalCost: invoice.totalCost,
@@ -131,10 +139,13 @@ export class InvoiceService {
 
       // Create invoice
       const invoice = await this.invoiceModel.create({
-        items: processedItems,
+        items: processedItems,     
         title:createInvoiceDto.title,
         totalQuantity,
         totalCost,
+        clientName: createInvoiceDto.clientName,
+        clientEmail: createInvoiceDto.clientEmail,
+        clientAddress: createInvoiceDto.clientAddress,
         userAccount: {
           userType,
           [`${userType}Id`]: user._id,

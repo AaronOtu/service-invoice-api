@@ -17,8 +17,8 @@ import { AuthGuard } from './guard/auth.guard';
 
   imports: [
     ConfigModule.forRoot({ isGlobal: true}),
-    MongooseModule.forRoot(process.env.DATABASE_URL),
-    //MongooseModule.forRoot('mongodb://localhost:27017/service-invoice-api'),
+   // MongooseModule.forRoot(process.env.DATABASE_URL),
+    MongooseModule.forRoot('mongodb://localhost:27017/service-invoice-api'),
     AdminModule, EmployeesModule,  InventoryModule, InvoiceModule, MaterialRequestModule,],
   controllers: [AppController],
   providers: [

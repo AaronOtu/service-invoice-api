@@ -19,8 +19,25 @@ export class CreateInvoiceDto {
 
   @IsOptional()
   @IsString()
-  @ApiProperty({required:true, default: 'IInvoice for kwesi Oppong'})
+  @ApiProperty({required:true, default: 'Invoice for service provided for kwesi Oppong'})
   title: string;
+
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({required:true, default: 'kwesi Oppong'})
+  clientName: string;
+
+  
+  @IsOptional()
+  @IsString()
+  @ApiProperty({required:true, default: 'kwesioppong@gmail.com'})
+  clientEmail: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({required:true, default: 'Accra-Amasaman'})
+  clientAddress: string;
 
   @IsArray()
   @ValidateNested({ each: true })

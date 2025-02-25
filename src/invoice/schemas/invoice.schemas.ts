@@ -5,7 +5,6 @@ import { Employee } from "src/employees/schemas/employee.schemas";
 import { Status } from "src/enum/invoice.enum";
 import { Inventory } from "src/inventory/schemas/inventory.schemas";
 
-
 export type InvoiceItemDocument = HydratedDocument<InvoiceItem>;
 export type InvoiceDocument = HydratedDocument<Invoice>;
 
@@ -82,8 +81,14 @@ type UserAccount = StoredAdmin | StoredEmployee;
 
 @Schema({timestamps:true})
 export class Invoice {
-
+  @Prop({
+    required: true,
+    unique: true,
+    default: () => `HRM${Math.floor(10000000 + Math.random() * 90000000)}`,
+  })
+  invoiceId: string;
   @Prop({ type: [{
+    _id: false,
     inventoryItem: { type: Types.ObjectId, required: true, ref: 'Inventory' },
     name: { type: String },
     costPerItem: { type: Number },
@@ -95,6 +100,15 @@ export class Invoice {
 
 @Prop()
 title:string
+
+@Prop()
+clientName:string
+
+@Prop()
+clientEmail:string
+
+@Prop()
+clientAddress:string
 
 @Prop()
 totalCost:number
@@ -112,6 +126,7 @@ status:Status
 
 @Prop({
   type: {
+    _id: false,
     userType: { type: String, enum: ['admin', 'employee'], required:true },
     adminId: { type: Types.ObjectId, ref: 'Admin' },
     employeeId: { type: Types.ObjectId, ref: 'Employee' },
@@ -128,9 +143,20 @@ userAccount: UserAccount;
 
 export const InvoiceSchema = SchemaFactory.createForClass(Invoice)
 
+//InvoiceSchema.index({ invoiceId: 1 }, { unique: true });
+function generateUniqueInvoiceId(): string {
+  const randomDigits = Math.floor(10000000 + Math.random() * 90000000); // Generates 8 random digits
+  return `HRM${randomDigits}`;
+}
 
 InvoiceSchema.pre('save', async function(next) {
   if (this.isNew) {
+
+
+
+    
+    
+   
     // Calculate totals
     // this.totalQuantity = this.items.reduce((sum, item) => sum + item.quantity, 0);
     // this.totalCost = this.items.reduce((sum, item) => sum + item.cost, 0);
