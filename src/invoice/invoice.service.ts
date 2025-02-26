@@ -234,12 +234,12 @@ export class InvoiceService {
   }
   async updateStatusInvoice(id: string, statusDto: StatusDto) {
     try {
-      // Validate ID
+    
       if (!id) {
         throw new BadRequestException('Invoice ID is required');
       }
   
-      // Validate status against enum
+      
       if (!Object.values(Status).includes(statusDto.status)) {
         this.logger.error(`Invalid status provided: ${statusDto.status}`);
         throw new BadRequestException(
