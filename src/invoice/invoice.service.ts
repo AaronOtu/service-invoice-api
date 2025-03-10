@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Invoice } from './schemas/invoice.schemas';
@@ -37,11 +37,12 @@ export class InvoiceService {
     }));
 
     let userInfo = {};
-    if (includeUserInfo) {
+   /* if (includeUserInfo) {
       const user = await (invoice.userAccount.userType === 'admin'
         ? this.adminModel.findById(invoice.userAccount.adminId)
         : this.employeeModel.findById(invoice.userAccount.employeeId));
 
+        
       if (user) {
         userInfo = {
           name: `${user.firstname} ${user.lastname}`,
@@ -50,22 +51,34 @@ export class InvoiceService {
         };
       }
     }
+      */
 
-    let clientInfo = {
-      name: invoice.clientName,
-      email: invoice.clientEmail,
-      address: invoice.clientAddress
+    if (includeUserInfo){
+      let user;
+      if(invoice.userAccount.userType === 'admin'){
+        user = await this.adminModel.findById(invoice.userAccount.adminId);
+      }
+      else{ 
+        throw new ConflictException('User is not authorized to perform this action');
+      }
+      if(user){
+        userInfo = {
+          name: `${user.firstname} ${user.lastname}`,
+          email: user.email,
+          role: user.role
+        };
+      }
+
+
+
     }
 
     return {
       success: true,
-      message: 'Invoice operation completed successfully.',
+      message: 'Invoice retrieved successfully',
       invoice: {
         _id: invoice._id.toString(),
-        invoiceId: invoice.invoiceId,
-        title:invoice.title,
         userInfo,
-        clientInfo,
         items: formattedItems,
         totalQuantity: invoice.totalQuantity,
         totalCost: invoice.totalCost,
@@ -139,13 +152,9 @@ export class InvoiceService {
 
       // Create invoice
       const invoice = await this.invoiceModel.create({
-        items: processedItems,     
-        title:createInvoiceDto.title,
+        items: processedItems,
         totalQuantity,
         totalCost,
-        clientName: createInvoiceDto.clientName,
-        clientEmail: createInvoiceDto.clientEmail,
-        clientAddress: createInvoiceDto.clientAddress,
         userAccount: {
           userType,
           [`${userType}Id`]: user._id,
@@ -153,8 +162,8 @@ export class InvoiceService {
           lastname: user.lastname
         }
       });
-      this.logger.log('Succesfully created invoice', invoice)
-     
+      this.logger.log('Successfully created invoice', invoice)
+
       return this.formatInvoiceResponse(invoice);
     } catch (error) {
       this.logger.error('Error creating invoice:', error);
@@ -234,12 +243,12 @@ export class InvoiceService {
   }
   async updateStatusInvoice(id: string, statusDto: StatusDto) {
     try {
-    
+      // Validate ID
       if (!id) {
         throw new BadRequestException('Invoice ID is required');
       }
   
-      
+      // Validate status against enum
       if (!Object.values(Status).includes(statusDto.status)) {
         this.logger.error(`Invalid status provided: ${statusDto.status}`);
         throw new BadRequestException(
