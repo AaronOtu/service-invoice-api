@@ -5,7 +5,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Employee } from './schemas/employee.schemas';
 import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
-import * as bcrypt from 'bcrypt';
+//import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class EmployeesService {
