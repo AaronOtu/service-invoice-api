@@ -90,6 +90,7 @@ export class AdminService {
         refreshToken: refreshToken,
       };
     } catch (error) {
+      this.logger.log(error);
       throw error;
     }
   }
@@ -133,7 +134,7 @@ export class AdminService {
         throw new NotFoundException('Admin not found');
       }
       return {
-        message: 'Succefully updated admin profile',
+        message: 'Successfully updated admin profile',
         admin: admin,
       };
     } catch (error) {

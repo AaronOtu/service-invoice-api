@@ -5,13 +5,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Employee } from './schemas/employee.schemas';
 import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
-//import * as bcrypt from 'bcrypt';
+
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class EmployeesService {
-  private logger = new Logger(EmployeesService.name);
-  constructor(@InjectModel(Employee.name) private employeeModel: Model<Employee>, private jwtService: JwtService) { }
+  private readonly logger = new Logger(EmployeesService.name);
+  constructor(@InjectModel(Employee.name) private readonly employeeModel: Model<Employee>, private readonly jwtService: JwtService) { }
 
 
 
@@ -148,7 +148,7 @@ export class EmployeesService {
       }
       
     } catch (error) {
-      this.logger.log(error.messag)
+      this.logger.log(error.message)
       throw error
       
     }
