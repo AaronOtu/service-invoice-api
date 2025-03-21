@@ -16,10 +16,10 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AdminService {
-  private logger = new Logger(AdminService.name);
+  private readonly logger = new Logger(AdminService.name);
   constructor(
-    @InjectModel(Admin.name) private adminModel: Model<Admin>,
-    private jwtService: JwtService,
+    @InjectModel(Admin.name) private readonly adminModel: Model<Admin>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async registerAdmin(createAdminDto: CreateAdminDto) {

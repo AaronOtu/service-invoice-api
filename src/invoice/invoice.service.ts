@@ -8,18 +8,16 @@ import { Inventory } from '../inventory/schemas/inventory.schemas';
 import { CreateInvoiceDto, StatusDto } from './dto/create-invoice.dto';
 import { Status } from '../enum/invoice.enum';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
-import { MaterialRequest } from 'src/material-request/schemas/material-request.schemas';
-import { MaterialStatus } from 'src/enum/material-request.enum';
 
 @Injectable()
 export class InvoiceService {
   private readonly logger = new Logger(InvoiceService.name);
 
   constructor(
-    @InjectModel(Invoice.name) private invoiceModel: Model<Invoice>,
-    @InjectModel(Admin.name) private adminModel: Model<Admin>,
-    @InjectModel(Employee.name) private employeeModel: Model<Employee>,
-    @InjectModel(Inventory.name) private inventoryModel: Model<Inventory>,
+    @InjectModel(Invoice.name) private readonly invoiceModel: Model<Invoice>,
+    @InjectModel(Admin.name) private readonly adminModel: Model<Admin>,
+    @InjectModel(Employee.name) private readonly employeeModel: Model<Employee>,
+    @InjectModel(Inventory.name) private readonly inventoryModel: Model<Inventory>,
    // @InjectModel(MaterialRequest.name) private materialRequestModel: Model<MaterialRequest>
   ) { }
 
@@ -238,6 +236,7 @@ export class InvoiceService {
 
     }
     catch (error) {
+      this.logger.log(error);
       throw error
     }
   }

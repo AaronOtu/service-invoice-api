@@ -7,9 +7,10 @@ import { CreateEmployeeDto, LoginEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { EmployeesService } from './employees.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/enum/public.decorator';
 
 
-//@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('access-token')
 @Controller('api')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) { }
@@ -20,6 +21,7 @@ export class EmployeesController {
     return this.employeesService.registerEmployee(createEmployeeDto);
   }
   @ApiTags('Auth') 
+  @Public()
   @Post('employee/login')
   loginEmployee(@Body() loginDto: LoginEmployeeDto) {
     return this.employeesService.loginEmployee(loginDto);

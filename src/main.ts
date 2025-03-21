@@ -2,22 +2,32 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as dotenv from 'dotenv'; 
+import * as dotenv from 'dotenv';
 dotenv.config();
-
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe)
-   const config = new DocumentBuilder()
-   .setTitle('Invoice Service API')
-   .setDescription('An API to send generated invoices')
-   .setVersion('1.0')
-   .addBearerAuth()
-   .build();
+  app.useGlobalPipes(new ValidationPipe());
+  const config = new DocumentBuilder()
+    .setTitle('Invoice Service API')
+    .setDescription('An API to send generated invoices')
+    .setVersion('1.0')
+    .addBearerAuth(
+   
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+      },
+      'access-token', 
+    )
 
- const document = SwaggerModule.createDocument(app, config);
- SwaggerModule.setup('api', app, document);
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

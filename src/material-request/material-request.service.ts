@@ -3,7 +3,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  Search,
 } from '@nestjs/common';
 import {
   CreateMaterialRequestDto,
@@ -246,6 +245,7 @@ export class MaterialRequestService {
         message: `Successfully deleted request item`,
       };
     } catch (error) {
+      this.logger.log(error);
       throw error;
     }
   }

@@ -7,8 +7,8 @@ import { Inventory } from './schemas/inventory.schemas';
 
 @Injectable()
 export class InventoryService {
-  private logger = new Logger(InventoryService.name);
-  constructor(@InjectModel(Inventory.name) private inventoryModel: Model<Inventory>) { }
+  private readonly logger = new Logger(InventoryService.name);
+  constructor(@InjectModel(Inventory.name) private readonly inventoryModel: Model<Inventory>) { }
   async addInventory(createInventoryDto: CreateInventoryDto) {
     try {
 
@@ -81,6 +81,7 @@ export class InventoryService {
       }
 
     } catch (error) {
+      this.logger.log(error)
       throw error
     }
   }

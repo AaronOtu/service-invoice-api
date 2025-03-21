@@ -15,9 +15,9 @@ import {
 } from './dto/create-material-request.dto';
 import { UpdateMaterialRequestDto } from './dto/update-material-request.dto';
 import { Public } from 'src/enum/public.decorator';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MaterialStatus } from 'src/enum/material-request.enum';
-
+@ApiBearerAuth('access-token')
 @Controller('api')
 export class MaterialRequestController {
   constructor(
@@ -31,7 +31,7 @@ export class MaterialRequestController {
     );
   }
 
-  @Public()
+  
   @Get('material-request')
   findAll() {
     return this.materialRequestService.getAllMaterialRequested();

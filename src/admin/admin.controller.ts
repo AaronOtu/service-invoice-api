@@ -3,9 +3,12 @@ import { RolesGuard } from 'src/guard/role.guard';
 import { AdminService } from './admin.service';
 import { CreateAdminDto, LoginAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/enum/public.decorator';
-
+import { AuthGuard } from 'src/guard/auth.guard';
+import { Roles } from 'src/enum/roles.decorator';
+import { Role } from 'src/enum/role.enum';
+@ApiBearerAuth('access-token')
 @Controller('api')
 @UseGuards(RolesGuard)
 export class AdminController {
@@ -17,15 +20,17 @@ export class AdminController {
   }
 
   @ApiTags('Auth') 
+  @Public()
   @Post('admin/login')
   loginAdmin(@Body() loginDto: LoginAdminDto) {
     return this.adminService.loginAdmin(loginDto);
   }
 
-  @Public()
+  //@Public()
   @Get('admin')
   //@Roles(Role.ADMIN)
-  //@UseGuards(AuthGuard, RoleGuard)
+  //@UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth('access-token')
   getAllAdmins() {
     return this.adminService.getAllAdmins();
   }

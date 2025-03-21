@@ -1,8 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto, StatusDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
-
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Role } from 'src/enum/role.enum';
+import { Roles } from 'src/enum/roles.decorator';
+import { RolesGuard } from 'src/guard/role.guard';
+import { AuthGuard } from 'src/guard/auth.guard';
+@ApiBearerAuth('access-token')
+//@Roles(Role.ADMIN)
+//@UseGuards(AuthGuard,RolesGuard)
 @Controller('api')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
