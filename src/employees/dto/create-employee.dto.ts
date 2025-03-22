@@ -19,10 +19,10 @@ export class CreateEmployeeDto {
   @ApiProperty({required:true, default:'aaronotu@gmail.com'})
   email: string
 
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({required:true, default:'password1234'})
-  password: string
+  // @IsNotEmpty()
+  // @IsString()
+  // @ApiProperty({required:true, default:'password1234'})
+  // password: string
 
   @IsNotEmpty()
   @IsString()

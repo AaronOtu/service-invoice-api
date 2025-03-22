@@ -16,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class EmployeesService {
@@ -25,6 +26,10 @@ export class EmployeesService {
     private readonly jwtService: JwtService,
   ) {}
 
+  private generatePassword(): string {
+    return crypto.randomBytes(4).toString('hex');
+  }
+
   async registerEmployee(createEmployeeDto: CreateEmployeeDto) {
     try {
       const existingEmployee = await this.employeeModel.findOne({
@@ -33,7 +38,10 @@ export class EmployeesService {
       if (existingEmployee) {
         throw new ConflictException('This Employee already exist');
       }
-      const hashedPassword = await bcrypt.hash(createEmployeeDto.password, 10);
+      //const hashedPassword = await bcrypt.hash(createEmployeeDto.password, 10);
+      const generatedPassword = this.generatePassword();
+      const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+
       const newEmployee = new this.employeeModel({
         ...createEmployeeDto,
         password: hashedPassword,
@@ -43,7 +51,13 @@ export class EmployeesService {
 
       return {
         message: 'Employee successfully created',
-        employee: newEmployee,
+        employee: {
+          firstname: newEmployee.firstname,
+          lastname: newEmployee.lastname,
+          email: newEmployee.email,
+          role: newEmployee.role,
+        },
+        password: generatedPassword,
       };
     } catch (error) {
       this.logger.error(error);
