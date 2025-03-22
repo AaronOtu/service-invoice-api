@@ -1,7 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { RolesGuard } from 'src/guard/role.guard';
 import { AdminService } from './admin.service';
-import { CreateAdminDto, LoginAdminDto } from './dto/create-admin.dto';
+import {
+  CreateAdminDto,
+  LoginAdminDto,
+  LogoutAdminDto,
+} from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/enum/public.decorator';
@@ -12,19 +26,26 @@ import { Role } from 'src/enum/role.enum';
 @Controller('api')
 @UseGuards(RolesGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) { }
+  constructor(private readonly adminService: AdminService) {}
 
   @Post('admin/register')
   registerAdmin(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.registerAdmin(createAdminDto);
   }
 
-  @ApiTags('Auth') 
+  @ApiTags('Auth')
   @Public()
   @Post('admin/login')
   loginAdmin(@Body() loginDto: LoginAdminDto) {
     return this.adminService.loginAdmin(loginDto);
   }
+
+  // @Post('admin/logout')
+  // async logoutAdmin(@Body() logoutDto: LogoutAdminDto) {
+   
+
+  //   return this.adminService.logoutAdmin(logoutDto);
+  // }
 
   //@Public()
   @Get('admin')
@@ -49,5 +70,4 @@ export class AdminController {
   removeAdmin(@Param('id') id: string) {
     return this.adminService.removeAdmin(id);
   }
-
 }

@@ -6,7 +6,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateAdminDto, LoginAdminDto } from './dto/create-admin.dto';
+import { CreateAdminDto, LoginAdminDto, LogoutAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { Admin } from './schemas/admin.schemas';
 import { Model } from 'mongoose';
@@ -29,6 +29,10 @@ export class AdminService {
         .exec();
       if (existingAdmin) {
         throw new ConflictException('This Admin already exits');
+      }
+
+      if(createAdminDto.role == 'EMPLOYEE'){
+        throw new ConflictException('Role must be ADMIN');
       }
       const hashedPassword = await bcrypt.hash(createAdminDto.password, 10);
 
@@ -92,6 +96,30 @@ export class AdminService {
     } catch (error) {
       this.logger.log(error);
       throw error;
+    }
+  }
+
+  async logoutAdmin(accessToken: LogoutAdminDto) {
+    try {
+
+      if (!accessToken.token) {
+        throw new UnauthorizedException('Token is required');
+      }
+      // Verify the token
+      const decoded = this.jwtService.verify(accessToken.token,{
+        secret: process.env.JWT_SECRET, 
+      });
+      
+      this.logger.log(`Admin logged out: ${decoded.email}`);
+      
+      return {
+        success: true,
+        message: 'Logout successful'
+      };
+      
+    } catch (error) {
+      this.logger.error('Logout failed:', error);
+      throw new UnauthorizedException('Invalid token');
     }
   }
 

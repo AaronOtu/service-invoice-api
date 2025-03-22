@@ -1,26 +1,38 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { Role } from 'src/enum/role.enum';
 import { Roles } from 'src/enum/roles.decorator';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { RolesGuard } from 'src/guard/role.guard';
-import { CreateEmployeeDto, LoginEmployeeDto } from './dto/create-employee.dto';
+import {
+  ChangePasswordDto,
+  CreateEmployeeDto,
+  LoginEmployeeDto,
+} from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { EmployeesService } from './employees.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/enum/public.decorator';
 
-
 @ApiBearerAuth('access-token')
 @Controller('api')
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) { }
-
+  constructor(private readonly employeesService: EmployeesService) {}
 
   @Post('employee/register')
   registerEmployee(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.registerEmployee(createEmployeeDto);
   }
-  @ApiTags('Auth') 
+  @ApiTags('Auth')
   @Public()
   @Post('employee/login')
   loginEmployee(@Body() loginDto: LoginEmployeeDto) {
@@ -35,13 +47,21 @@ export class EmployeesController {
     return this.employeesService.getAllEmployee();
   }
 
+  @Post('employee/change-password')
+  changePassword(@Body() dto: ChangePasswordDto) {
+    return this.employeesService.changePassword(dto);
+  }
+
   @Get('employee/:id')
   getEmployeeProfile(@Param('id') id: string) {
     return this.employeesService.getEmployeeProfile(id);
   }
 
   @Patch('employee/:id')
-  update(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateEmployeeDto: UpdateEmployeeDto,
+  ) {
     return this.employeesService.updateEmployee(id, updateEmployeeDto);
   }
 

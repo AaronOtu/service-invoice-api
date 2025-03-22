@@ -42,3 +42,13 @@ export class LoginAdminDto{
   @ApiProperty({required:true, default:'password1234'})
   password:string
 }
+
+
+export class LogoutAdminDto{
+  
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({required:true })
+  token:string
+
+}

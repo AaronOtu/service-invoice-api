@@ -1,23 +1,22 @@
-import { ApiProperty } from "@nestjs/swagger"
-import { IsEmail, IsNotEmpty, IsString } from "class-validator"
-import { Role } from "src/enum/role.enum"
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { Role } from 'src/enum/role.enum';
 
 export class CreateEmployeeDto {
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({ required: true, default: 'Aaron' })
+  firstname: string;
 
   @IsNotEmpty()
   @IsString()
-  @ApiProperty({required:true, default:'Aaron'})
-  firstname: string
-
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({required: true, default:'Otu'})
-  lastname: string
+  @ApiProperty({ required: true, default: 'Otu' })
+  lastname: string;
 
   @IsNotEmpty()
   @IsEmail()
-  @ApiProperty({required:true, default:'aaronotu@gmail.com'})
-  email: string
+  @ApiProperty({ required: true, default: 'aaronotu@gmail.com' })
+  email: string;
 
   // @IsNotEmpty()
   // @IsString()
@@ -26,30 +25,32 @@ export class CreateEmployeeDto {
 
   @IsNotEmpty()
   @IsString()
-  @ApiProperty({required:false, default:Role.EMPLOYEE})
-  role: string
+  @ApiProperty({ required: false, default: Role.EMPLOYEE })
+  role: string;
 }
 
-
-
-
-export class LoginEmployeeDto{
-
+export class LoginEmployeeDto {
   @IsString()
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty({required:true, default: 'aaronotu@gmail.com'})
-  email:string
-
+  @ApiProperty({ required: true, default: 'aaronotu@gmail.com' })
+  email: string;
 
   @IsString()
   @IsNotEmpty()
-  @ApiProperty({required:true, default: 'password1234'})
-  password:string
-
-
-
-
-
-
+  @ApiProperty({ required: true, default: 'password1234' })
+  password: string;
 }
+
+export class ChangePasswordDto {
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  @ApiProperty({ required: true, default: 'aaronotu@gmail.com' })
+  email: string;
+
+//   @IsString()
+//   @IsNotEmpty()
+//   @ApiProperty({ required: true, default: 'password1234' })
+//   oldPassword: string;
+ }

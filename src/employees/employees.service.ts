@@ -8,7 +8,11 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateEmployeeDto, LoginEmployeeDto } from './dto/create-employee.dto';
+import {
+  ChangePasswordDto,
+  CreateEmployeeDto,
+  LoginEmployeeDto,
+} from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Employee } from './schemas/employee.schemas';
@@ -27,7 +31,7 @@ export class EmployeesService {
   ) {}
 
   private generatePassword(): string {
-    return crypto.randomBytes(4).toString('hex');
+    return crypto.randomBytes(6).toString('hex');
   }
 
   async registerEmployee(createEmployeeDto: CreateEmployeeDto) {
@@ -37,6 +41,10 @@ export class EmployeesService {
       });
       if (existingEmployee) {
         throw new ConflictException('This Employee already exist');
+      }
+
+      if(createEmployeeDto.role == 'ADMIN'){
+        throw new ConflictException('Admin role is not allowed for this user');
       }
       //const hashedPassword = await bcrypt.hash(createEmployeeDto.password, 10);
       const generatedPassword = this.generatePassword();
@@ -121,6 +129,45 @@ export class EmployeesService {
         throw error;
       }
       throw new ConflictException(error.message || 'Something went wrong');
+    }
+  }
+
+  async changePassword(changeDto: ChangePasswordDto) {
+    try {
+      const employee = await this.employeeModel
+        .findOne({ email: changeDto.email })
+        .exec();
+      if (!employee) {
+        throw new NotFoundException('User not found');
+      }
+   
+      /*
+      const isPasswordValid = await bcrypt.compare(
+        changeDto.oldPassword,
+        employee.password,
+      );
+      if (!isPasswordValid) {
+        throw new BadRequestException('Invalid old password');
+      }
+        */
+      const generatedPassword = this.generatePassword();
+      const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+      await this.employeeModel
+        .updateOne(
+          { email: changeDto.email },
+          { $set: { password: hashedPassword } },
+        )
+        .exec();
+
+        this.logger.log(`Password changed for ${employee.email}`)
+
+      return {
+        success:true,
+        message: `Password changed successfully for ${employee.email}`,
+        password: generatedPassword,
+      }
+    } catch (error) {
+      this.logger.log(error);
     }
   }
 

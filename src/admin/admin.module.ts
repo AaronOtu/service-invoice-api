@@ -7,7 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 dotenv.config();
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Admin.name, schema: AdminSchema }]),
